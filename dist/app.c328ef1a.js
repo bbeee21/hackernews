@@ -123,27 +123,26 @@ var ajax = new XMLHttpRequest();
 var content = document.createElement('div');
 var NEWS_URL = 'https://api.hnpwa.com/v0/news/1.json';
 var CONTENT_URL = 'https://api.hnpwa.com/v0/item/@id.json';
-ajax.open('GET', NEWS_URL, ajax.response);
-ajax.send();
-var newsFeed = JSON.parse(ajax.response);
+function getData(url) {
+  ajax.open('GET', url, false);
+  ajax.send();
+  return JSON.parse(ajax.response);
+}
+var newsFeed = getData(NEWS_URL);
 var ul = document.createElement('ul');
 window.addEventListener('hashchange', function () {
   var id = location.hash.substr(1);
-  ajax.open('GET', CONTENT_URL.replace('@id', id), false);
-  ajax.send();
-  var newsContent = JSON.parse(ajax.response);
+  var newsContent = getData(CONTENT_URL.replace('@id', id));
   var title = document.createElement('h1');
   title.innerHTML = newsContent.title;
   content.appendChild(title);
 });
 for (var i = 0; i < 10; i++) {
-  var li = document.createElement('li');
-  var a = document.createElement('a');
-  a.href = "#".concat(newsFeed[i].id);
-  a.innerHTML = "".concat(newsFeed[i].title, " (").concat(newsFeed[i].comments_count, ")");
-  li.appendChild(a);
-  ul.appendChild(li);
+  var div = document.createElement('div');
+  div.innerHTML = "\n    <li>\n      <a href=\"#".concat(newsFeed[i].id, "\">\n        ").concat(newsFeed[i].title, " (").concat(newsFeed[i].comments_count, ")\n      </a>\n    </li>\n  ");
+  ul.appendChild(div.firstElementChild); // div태그는 필요없고, 안에 li 태그만 가져오려고 하므로
 }
+
 container.appendChild(ul);
 container.appendChild(content);
 },{}],"../../../AppData/Roaming/npm/node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {

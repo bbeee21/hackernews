@@ -4,20 +4,20 @@ const content = document.createElement('div');
 const NEWS_URL = 'https://api.hnpwa.com/v0/news/1.json';
 const CONTENT_URL = 'https://api.hnpwa.com/v0/item/@id.json';
 
-ajax.open('GET', NEWS_URL, ajax.response);
-ajax.send();
+function getData(url) {
+  ajax.open('GET', url, false);
+  ajax.send();
 
+  return JSON.parse(ajax.response);
+}
 
-const newsFeed = JSON.parse(ajax.response);
+const newsFeed = getData(NEWS_URL);
 const ul = document.createElement('ul');
 
 window.addEventListener('hashchange', function() {
   const id = location.hash.substr(1);
-
-  ajax.open('GET', CONTENT_URL.replace('@id', id), false);
-  ajax.send();
-
-  const newsContent = JSON.parse(ajax.response);
+  
+  const newsContent = getData(CONTENT_URL.replace('@id', id));
   const title = document.createElement('h1');
 
   title.innerHTML = newsContent.title;
@@ -27,14 +27,19 @@ window.addEventListener('hashchange', function() {
 });
 
 for(let i=0; i<10; i++){
-  const li = document.createElement('li');
-  const a = document.createElement('a');
+  const div = document.createElement('div');
 
-  a.href = `#${newsFeed[i].id}`;
-  a.innerHTML = `${newsFeed[i].title} (${newsFeed[i].comments_count})`;
+  div.innerHTML = `
+    <li>
+      <a href="#${newsFeed[i].id}">
+        ${newsFeed[i].title} (${newsFeed[i].comments_count})
+      </a>
+    </li>
+  `;
 
-  li.appendChild(a);
-  ul.appendChild(li);
+  ul.appendChild(div.firstElementChild); // div태그는 필요없고, 안에 li 태그만 가져오려고 하므로
+
+
 }
 
 
