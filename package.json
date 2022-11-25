@@ -1,5 +1,8 @@
 {
   "dependencies": {
     "colors": "^1.4.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.3"
   }
 }
