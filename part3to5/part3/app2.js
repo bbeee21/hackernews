@@ -70,7 +70,7 @@ const ul = document.createElement('ul');
 console.log(newsFeed.length);
 
 
-// router
+// router : 화면처리기 생성
 function router() {
   const routePath = location.hash;
 
