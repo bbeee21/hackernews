@@ -137,7 +137,9 @@ function getData(url) {
 function newsFeed() {
   var newsFeed = getData(NEWS_URL);
   var newsList = [];
-  newsList.push('<ul>');
+
+  // 가변 값이기 때문에 let으로 설정
+  var template = "\n    <div class=\"container mx-auto p-4\">\n      <h1>Hacker News</h1>\n      <ul>\n        {{__news_feed__}}\n      </ul>\n      <div class=\"test underline\">\n        <a href=\"#/page/{{__prev_page__}}\">\uC774\uC804 \uD398\uC774\uC9C0</a>\n        <a href=\"#/page/{{__next_page__}}\">\uB2E4\uC74C \uD398\uC774\uC9C0</a>\n      </div>\n    </div>\n  ";
   for (var i = (store.currentPage - 1) * 10; i < store.currentPage * 10; i++) {
     // const div = document.createElement('div');
     newsList.push("\n      <li>\n        <a href=\"#/show/".concat(newsFeed[i].id, "\">\n        ").concat(newsFeed[i].title, " (").concat(newsFeed[i].comments_count, ")\n        </a>\n      </li>\n    "));
@@ -146,13 +148,14 @@ function newsFeed() {
     // ul.appendChild(div.firstElementChild);
   }
 
-  newsList.push('</ul>');
-
+  template = template.replace('{{__news_feed__}}', newsList.join(''));
+  template = template.replace('{{__prev_page__}}', store.currentPage > 1 ? store.currentPage - 1 : 1);
+  template = template.replace('{{__next_page__}}', store.currentPage + 1);
   // 배열을 하나의 문자열로 합치는 작업
 
   // 방어 코드 + 삼항 연산자 활용
-  newsList.push("\n    <div>\n      <a href=\"#/page/".concat(store.currentPage > 1 ? store.currentPage - 1 : 1, "\">\uC774\uC804 \uD398\uC774\uC9C0</a>\n      <a href=\"#/page/").concat(store.currentPage + 1, "\">\uB2E4\uC74C \uD398\uC774\uC9C0</a>\n    </div>\n  "));
-  container.innerHTML = newsList.join('');
+
+  container.innerHTML = template;
   // container.appendChild(ul);
   // container.appendChild(content);
 }
@@ -214,7 +217,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53838" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "55327" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

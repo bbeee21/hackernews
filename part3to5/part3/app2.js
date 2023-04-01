@@ -21,7 +21,20 @@ function newsFeed() {
   const newsFeed = getData(NEWS_URL);
   const newsList =  [];
 
-  newsList.push('<ul>');
+  // 가변 값이기 때문에 let으로 설정
+  let template = `
+    <div class="container mx-auto p-4">
+      <h1>Hacker News</h1>
+      <ul>
+        {{__news_feed__}}
+      </ul>
+      <div class="test underline">
+        <a href="#/page/{{__prev_page__}}">이전 페이지</a>
+        <a href="#/page/{{__next_page__}}">다음 페이지</a>
+      </div>
+    </div>
+  `;
+
   
   
   for(let i = (store.currentPage - 1) * 10; i < store.currentPage * 10; i++) {
@@ -38,19 +51,15 @@ function newsFeed() {
     // ul.appendChild(div.firstElementChild);
   }
   
-  newsList.push('</ul>');
-  
+  template = template.replace('{{__news_feed__}}', newsList.join(''));
+  template = template.replace('{{__prev_page__}}', store.currentPage > 1 ? store.currentPage - 1 : 1);
+  template = template.replace('{{__next_page__}}', store.currentPage + 1);
   // 배열을 하나의 문자열로 합치는 작업
 
   // 방어 코드 + 삼항 연산자 활용
-  newsList.push(`
-    <div>
-      <a href="#/page/${store.currentPage > 1 ? store.currentPage - 1 : 1}">이전 페이지</a>
-      <a href="#/page/${store.currentPage + 1}">다음 페이지</a>
-    </div>
-  `);
   
-  container.innerHTML = newsList.join('');
+  
+  container.innerHTML = template;
   // container.appendChild(ul);
   // container.appendChild(content);
   
