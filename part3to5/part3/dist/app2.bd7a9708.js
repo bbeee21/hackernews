@@ -123,6 +123,10 @@ var ajax = new XMLHttpRequest();
 var content = document.createElement('div');
 var NEWS_URL = 'https://api.hnpwa.com/v0/news/1.json';
 var CONTENT_URL = 'https://api.hnpwa.com/v0/item/@id.json';
+var store = {
+  // page 현재 상태는 전역 변수
+  currentPage: 1
+};
 function getData(url) {
   ajax.open('GET', url, false);
   ajax.send();
@@ -134,10 +138,9 @@ function newsFeed() {
   var newsFeed = getData(NEWS_URL);
   var newsList = [];
   newsList.push('<ul>');
-  for (var i = 0; i < 10; i++) {
+  for (var i = (store.currentPage - 1) * 10; i < store.currentPage * 10; i++) {
     // const div = document.createElement('div');
-
-    newsList.push("\n      <li>\n        <a href=\"#".concat(newsFeed[i].id, "\">\n        ").concat(newsFeed[i].title, " (").concat(newsFeed[i].comments_count, ")\n        </a>\n      </li>\n    "));
+    newsList.push("\n      <li>\n        <a href=\"#/show/".concat(newsFeed[i].id, "\">\n        ").concat(newsFeed[i].title, " (").concat(newsFeed[i].comments_count, ")\n        </a>\n      </li>\n    "));
 
     // ul.appendChild(div.children[0]);
     // ul.appendChild(div.firstElementChild);
@@ -147,6 +150,8 @@ function newsFeed() {
 
   // 배열을 하나의 문자열로 합치는 작업
 
+  // 방어 코드 + 삼항 연산자 활용
+  newsList.push("\n    <div>\n      <a href=\"#/page/".concat(store.currentPage > 1 ? store.currentPage - 1 : 1, "\">\uC774\uC804 \uD398\uC774\uC9C0</a>\n      <a href=\"#/page/").concat(store.currentPage + 1, "\">\uB2E4\uC74C \uD398\uC774\uC9C0</a>\n    </div>\n  "));
   container.innerHTML = newsList.join('');
   // container.appendChild(ul);
   // container.appendChild(content);
@@ -154,9 +159,9 @@ function newsFeed() {
 
 // 글 내용을 불러오는 코드
 function newsDetail() {
-  var id = location.hash.substr(1);
+  var id = location.hash.substr(7);
   var newsContent = getData(CONTENT_URL.replace('@id', id));
-  container.innerHTML = "\n    <h1>".concat(newsContent.title, "</h1>\n\n    <div>\n      <a href=\"#\">\uBAA9\uB85D\uC73C\uB85C</a>\n    </div>\n  \n  ");
+  container.innerHTML = "\n    <h1>".concat(newsContent.title, "</h1>\n\n    <div>\n      <a href=\"#/page/").concat(store.currentPage, "\">\uBAA9\uB85D\uC73C\uB85C</a>\n    </div>\n  \n  ");
 }
 var ul = document.createElement('ul');
 
@@ -169,8 +174,14 @@ function router() {
   if (routePath === '') {
     // 글 목록, # 값이 들어온 경우 빈값으로 판단함
     newsFeed();
+  } else if (routePath.indexOf('#/page/') >= 0) {
+    // 글 세부 내용 : page
+
+    // substr => 문자열로 반환 
+    store.currentPage = Number(routePath.substr(7));
+    newsFeed();
   } else {
-    // 글 세부 내용
+    // 글 세부 내용 : show
     newsDetail();
   }
 }
@@ -203,7 +214,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56828" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53838" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
