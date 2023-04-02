@@ -120,6 +120,7 @@ parcelRequire = (function (modules, cache, entry, globalName) {
 })({"app.ts":[function(require,module,exports) {
 "use strict";
 
+// type 정의
 var container = document.getElementById('root');
 var ajax = new XMLHttpRequest();
 var content = document.createElement('div');
@@ -242,7 +243,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "56013" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57756" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];

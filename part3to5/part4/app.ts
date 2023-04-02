@@ -1,9 +1,29 @@
-﻿const container = document.getElementById('root');
-const ajax = new XMLHttpRequest();
+﻿// type 정의
+
+type Store = {
+  currentPage: number;
+  feeds: NewsFeed[];
+}
+
+type NewsFeed = {
+  id: number;
+  comments_count: number;
+  url: string;
+  user: string;
+  time_ago: string;
+  points: number;
+  title: string;
+  read?: boolean;
+}
+
+
+
+const container: HTMLElement | null = document.getElementById('root');
+const ajax: XMLHttpRequest = new XMLHttpRequest();
 const content = document.createElement('div');
 const NEWS_URL = 'https://api.hnpwa.com/v0/news/1.json'
 const CONTENT_URL = 'https://api.hnpwa.com/v0/item/@id.json'; 
-const store = {
+const store: Store = {
   // page 현재 상태는 전역 변수
   currentPage : 1,
   feeds: [],
@@ -25,10 +45,20 @@ function makeFeeds(feeds) {
   return feeds;
 }
 
+
+// view 갱신, type guard 역할
+function updateView(html) {
+  if (container) {
+    container.innerHTML = html;
+  } else {
+    console.error('최상위 컨테이너가 없어 UI를 진행하지 못합니다.');
+  }
+}
+
 // 글 목록을 불러오는 코드
 function newsFeed() {
     
-  let newsFeed = store.feeds;
+  let newsFeed: NewsFeed[] = store.feeds;
   const newsList =  [];
 
   // 가변 값이기 때문에 let으로 설정
@@ -97,7 +127,9 @@ function newsFeed() {
   // 방어 코드 + 삼항 연산자 활용
   
   
-  container.innerHTML = template;
+  // ts에서 container가 null 값이 있는 경우, 해당 속성이 없음 innerHTML
+  updateView(template)
+  
   // container.appendChild(ul);
   // container.appendChild(content);
   
@@ -173,15 +205,11 @@ function newsDetail() {
     return commentString.join('');
   }
 
-
-
-  container.innerHTML = template.replace('{{__comments__}}', makeComment(newsContent.comments));
+  updateView(template.replace('{{__comments__}}', makeComment(newsContent.comments)));
 
 }
 
 
-// console.log(newsFeed);
-// console.log(newsFeed.length);
 
 
 // router : 화면처리기 생성
