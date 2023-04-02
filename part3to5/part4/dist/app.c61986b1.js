@@ -131,6 +131,14 @@ var store = {
   currentPage: 1,
   feeds: []
 };
+// 제네릭 사용 (2가지 타입을 리턴하기 때문)
+// 입력 A -> 출력 A , 입력 B -> 출력 B
+// AjaxResponse : 이름은 작명 가능
+// function getData(url: string):  NewsFeed[] | NewsDetail {
+//   ajax.open('GET', url, false);
+//   ajax.send();
+//   return JSON.parse(ajax.response);
+// }
 function getData(url) {
   ajax.open('GET', url, false);
   ajax.send();
@@ -143,6 +151,14 @@ function makeFeeds(feeds) {
   }
   return feeds;
 }
+// view 갱신, type guard 역할
+function updateView(html) {
+  if (container) {
+    container.innerHTML = html;
+  } else {
+    console.error('최상위 컨테이너가 없어 UI를 진행하지 못합니다.');
+  }
+}
 // 글 목록을 불러오는 코드
 function newsFeed() {
   var newsFeed = store.feeds;
@@ -151,6 +167,7 @@ function newsFeed() {
   var template = "\n    <div class=\"bg-gray-600 min-h-screen\">\n      <div class=\"bg-white text-xl\">\n        <div class=\"mx-auto px-4\">\n          <div class=\"flex justify-between items-center py-6\">\n            <div class=\"flex justify-start\">\n              <h1 class=\"font-extrabold\">Hacker News</h1>\n            </div>\n            <div class=\"items-center justify-end\">\n              <a href=\"#/page/{{__prev_page__}}\" class=\"text-gray-500\">\n                Previous\n              </a>\n              <a href=\"#/page/{{__next_page__}}\" class=\"text-gray-500 ml-4\">\n                Next\n              </a>\n            </div>\n          </div> \n        </div>\n      </div>\n      <div class=\"p-4 text-2xl text-gray-700\">\n        {{__news_feed__}}        \n      </div>\n    </div>\n  ";
   if (newsFeed.length === 0) {
     // js 문법(★★★★☆)
+    // 호출하는 쪽에서 유형을 명시해주면, 그 유형을 받아서 getData에서 받아서 사용
     newsFeed = store.feeds = makeFeeds(getData(NEWS_URL));
   }
   for (var i = (store.currentPage - 1) * 10; i < store.currentPage * 10; i++) {
@@ -161,11 +178,12 @@ function newsFeed() {
   }
 
   template = template.replace('{{__news_feed__}}', newsList.join(''));
-  template = template.replace('{{__prev_page__}}', store.currentPage > 1 ? store.currentPage - 1 : 1);
-  template = template.replace('{{__next_page__}}', store.currentPage + 1);
+  template = template.replace('{{__prev_page__}}', String(store.currentPage > 1 ? store.currentPage - 1 : 1));
+  template = template.replace('{{__next_page__}}', String(store.currentPage + 1));
   // 배열을 하나의 문자열로 합치는 작업
   // 방어 코드 + 삼항 연산자 활용
-  container.innerHTML = template;
+  // ts에서 container가 null 값이 있는 경우, 해당 속성이 없음 innerHTML
+  updateView(template);
   // container.appendChild(ul);
   // container.appendChild(content);
 }
@@ -181,24 +199,20 @@ function newsDetail() {
       break;
     }
   }
-  // 재귀 호출, 댓글 표시
-  function makeComment(comments, called) {
-    if (called === void 0) {
-      called = 0;
-    }
-    var commentString = [];
-    for (var i = 0; i < comments.length; i++) {
-      commentString.push("\n        <div style=\"padding-left: ".concat(called * 40, "px;\" class=\"mt-4\">\n          <div class=\"text-gray-400\">\n            <i class=\"fa fa-sort-up mr-2\"></i>\n            <strong>").concat(comments[i].user, "</strong> ").concat(comments[i].time_ago, "\n          </div>\n          <p class=\"text-gray-700\">").concat(comments[i].content, "</p>\n        </div>\n      "));
-      if (comments[i].comments.length > 0) {
-        commentString.push(makeComment(comments[i].comments, called + 1));
-      }
-    }
-    return commentString.join('');
-  }
-  container.innerHTML = template.replace('{{__comments__}}', makeComment(newsContent.comments));
+  updateView(template.replace('{{__comments__}}', makeComment(newsContent.comments)));
 }
-// console.log(newsFeed);
-// console.log(newsFeed.length);
+// 재귀 호출, 댓글 표시
+function makeComment(comments) {
+  var commentString = [];
+  for (var i = 0; i < comments.length; i++) {
+    var comment = comments[i];
+    commentString.push("\n      <div style=\"padding-left: ".concat(comment.level * 40, "px;\" class=\"mt-4\">\n        <div class=\"text-gray-400\">\n          <i class=\"fa fa-sort-up mr-2\"></i>\n          <strong>").concat(comment.user, "</strong> ").concat(comment.time_ago, "\n        </div>\n        <p class=\"text-gray-700\">").concat(comment.content, "</p>\n      </div>\n    "));
+    if (comment.comments.length > 0) {
+      commentString.push(makeComment(comment.comments));
+    }
+  }
+  return commentString.join('');
+}
 // router : 화면처리기 생성
 function router() {
   var routePath = location.hash;
@@ -243,7 +257,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "57756" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "53127" + '/');
   ws.onmessage = function (event) {
     checkedAssets = {};
     assetsToAccept = [];
