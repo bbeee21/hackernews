@@ -1,0 +1,11 @@
+{
+  "name": "part4",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {
+    "dev": "parcel index.html"
+  },
+  "author": "",
+  "license": "ISC"
+}
