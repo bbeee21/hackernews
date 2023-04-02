@@ -6,6 +6,7 @@ const CONTENT_URL = 'https://api.hnpwa.com/v0/item/@id.json';
 const store = {
   // page 현재 상태는 전역 변수
   currentPage : 1,
+  feeds: [],
 };
 
 function getData(url) {
@@ -15,10 +16,19 @@ function getData(url) {
   return JSON.parse(ajax.response);
 }
 
+// 글을 읽었는지 안읽었는지 체크
+function makeFeeds(feeds) {
+  for (let i = 0; i < feeds.length; i++) {
+    feeds[i].read = false;
+  }
+
+  return feeds;
+}
+
 // 글 목록을 불러오는 코드
 function newsFeed() {
     
-  const newsFeed = getData(NEWS_URL);
+  let newsFeed = store.feeds;
   const newsList =  [];
 
   // 가변 값이기 때문에 let으로 설정
@@ -47,6 +57,10 @@ function newsFeed() {
     </div>
   `;
 
+  if (newsFeed.length === 0) {
+    // js 문법(★★★★☆)
+    newsFeed = store.feeds = makeFeeds(getData(NEWS_URL));
+  }
   
   
   for(let i = (store.currentPage - 1) * 10; i < store.currentPage * 10; i++) {
@@ -126,6 +140,14 @@ function newsDetail() {
     </div>
   `;
 
+
+  // 클릭해서 상세 내용을 보고 나면, 글 읽었는지 체크
+  for(let i = 0; i < store.feeds.length; i++) {
+    if (store.feeds[i].id === Number(id)) {
+      store.feeds[i].read = true;
+      break;
+    }
+  }
 
   // 재귀 호출, 댓글 표시
 
